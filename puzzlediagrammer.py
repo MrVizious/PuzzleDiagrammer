@@ -16,6 +16,12 @@ class Player:
     def __str__(self) -> str:
         return str(self.name)
 
+    def __eq__(self, o: object) -> bool:
+        if type(o) is Player and o.name == self.name and o.place == self.place and self.items.sort() == o.items.sort():
+            return True
+        else:
+            return False
+
 
 class Item:
     '''
@@ -27,6 +33,12 @@ class Item:
 
     def __str__(self) -> str:
         return str(self.name)
+
+    def __eq__(self, o: object) -> bool:
+        if type(o) is Item and self.name == o.name:
+            return True
+        else:
+            return False
 
 
 class Place:
@@ -42,6 +54,12 @@ class Place:
     def __str__(self) -> str:
         return str(self.name)
 
+    def __eq__(self, o: object) -> bool:
+        if type(o) is Place and self.name == o.name and self.opened == o.opened and self.altars.sort() == o.altars.sort() and self.places.sort() == o.places.sort():
+            return True
+        else:
+            return False
+
 
 class Altar:
     '''
@@ -49,7 +67,6 @@ class Altar:
     active
     acceptedItems
     usedItems
-    inputMode  # AND, OR
     place
     '''
 
@@ -62,6 +79,12 @@ class Altar:
 
     def __str__(self) -> str:
         return str(self.name)
+
+    def __eq__(self, o: object) -> bool:
+        if type(o) is Altar and o.name == self.name:
+            return True
+        else:
+            return False
 
 
 class Obstacle:
@@ -82,6 +105,13 @@ class Obstacle:
     def __str__(self) -> str:
         return str(self.name)
 
+    def __eq__(self, o: object) -> bool:
+        if type(o) is Obstacle and self.name == o.name and self.opened == o.opened and self.altars.sort() == o.altars.sort() and self.places.sort() == o.places.sort():
+            return True
+        else:
+            return False
+
+
 ############################
 
 
@@ -95,10 +125,9 @@ class State:
     altars
     '''
 
-    def __init__(self, newNumber, newPlayer, newItems: list,  newPlaces, newObstacles, newAltars) -> None:
+    def __init__(self, newNumber, newPlayer, newPlaces, newObstacles, newAltars) -> None:
         self.number = newNumber
         self.player = newPlayer
-        self.items = newItems
         self.places = newPlaces
         self.obstacles = newObstacles
         self.altars = newAltars
@@ -106,8 +135,6 @@ class State:
     def __str__(self) -> str:
         returnString = "Number: " + str(self.number) + "\n"
         returnString += "Player: " + str(self.player) + "\n"
-        for item in self.items:
-            returnString += "Items: " + str(item) + "\n"
         for place in self.places:
             returnString += "Places: " + str(place) + "\n"
         for obstacle in self.obstacles:
@@ -121,8 +148,12 @@ class State:
             for altar in self.altars:
                 if item in altar.acceptedItems:
                     stateCopy = copy.deepcopy(self)
-                    stateCopy.player.items.remove(item)
-                    stateCopy.altars.usedItems.append(item)
+                    if item in stateCopy.player.items:
+                        stateCopy.player.items.remove(item)
+                        altar_in_copy = next(
+                            (x for x in stateCopy.altars if altar == x), None)
+                        if altar_in_copy is not None:
+                            altar_in_copy.usedItems.append(item)
                     return stateCopy
 
 
@@ -130,12 +161,11 @@ items = [Item("Companion cube")]
 places = [Place("Button room", [items[0]]), Place("Final room", [])]
 altars = [Altar("Ground button", False, items, [], places[0])]
 obstacles = [Obstacle("Final door", False, altars, places)]
-player = Player("Chell", places[0], [])
+player = Player("Chell", places[0], items)
 
+initialState = State(1, player, places, obstacles, altars)
 
-initialState = State(1, player, items, places, obstacles, altars)
+next_state = initialState.NextState()
 
-print(initialState)
-
-print(altars)
-print(str(initialState.NextState()))
+print(initialState.altars[0].usedItems)
+print(next_state.altars[0].usedItems)
