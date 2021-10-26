@@ -1,4 +1,5 @@
 import copy
+import os
 
 
 class State:
@@ -54,5 +55,20 @@ states = [initialState]
 
 states = NextWave(copy.deepcopy(states), copy.deepcopy(states))
 
+dotCode = "digraph {\n"
 for state in states:
-    print(state)
+    if state.towers[0] == [1, 2, 3]:
+        dotCode += str(state.number) + " [shape=box];\n"
+    if state.towers[2] == [1, 2, 3]:
+        dotCode += str(state.number) + " [shape=Msquare];\n"
+for state in states:
+    for nextState in state.NextStates():
+        dotCode += str(state.number) + " -> " + \
+            str(states.index(nextState)) + ";\n"
+dotCode += "\n}"
+
+
+with open('digraph.txt', 'w') as f:
+    f.write(dotCode)
+
+os.system("dot -Tpng digraph.txt > digraph.png")
