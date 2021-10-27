@@ -55,16 +55,31 @@ states = [initialState]
 
 states = NextWave(copy.deepcopy(states), copy.deepcopy(states))
 
-dotCode = "digraph {\n"
+dotCode = "strict graph {\n"
+dotCode += "\"123| | \"" + " [shape=doublecircle];\n"
+dotCode += "\" | |123\"" + " [shape=Msquare];\n"
 for state in states:
-    if state.towers[0] == [1, 2, 3]:
-        dotCode += str(state.number) + " [shape=box];\n"
-    if state.towers[2] == [1, 2, 3]:
-        dotCode += str(state.number) + " [shape=Msquare];\n"
-for state in states:
+    label = ""
+    for tower in state.towers:
+        for number in tower:
+            label += str(number)
+        if tower == []:
+            label += " "
+        label += "|"
+    label = label[:-1]
     for nextState in state.NextStates():
-        dotCode += str(state.number) + " -> " + \
-            str(states.index(nextState)) + ";\n"
+        nextLabel = ""
+        for tower in nextState.towers:
+            for number in tower:
+                nextLabel += str(number)
+            if tower == []:
+                nextLabel += " "
+            nextLabel += "|"
+
+        nextLabel = nextLabel[:-1]
+        dotCode += "\"" + str(label) + "\"" + " -- \"" + \
+            str(nextLabel) + \
+            "\";\n"
 dotCode += "\n}"
 
 
